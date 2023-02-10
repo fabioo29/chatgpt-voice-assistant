@@ -11,8 +11,10 @@ import soundfile as sf
 import sounddevice as sd
 
 from time import sleep
+from gtts import gTTS
 from functools import reduce
 import speech_recognition as sr
+from playsound import playsound
 from pynput import keyboard as pk
 from playwright.sync_api import sync_playwright
 
@@ -299,5 +301,8 @@ if __name__ == "__main__":
 
                     response = bot.ask(final_pred)
                     print(f"Bot: {response}")
+
+                    gTTS(text=response, lang='en').save("response.mp3")
+                    playsound("response.mp3")
                 except:
                     print("Sorry, I didn't catch that.")
