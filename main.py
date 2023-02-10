@@ -1,15 +1,11 @@
-import tempfile
-import queue
-import sys
 import os
-
-import sounddevice as sd
+import sys
+import queue
 import soundfile as sf
+import sounddevice as sd
 
+import speech_recognition as sr
 from pynput import keyboard as pk
-
-
-q = queue.Queue()
 
 
 def on_press(key):
@@ -28,13 +24,18 @@ def callback(indata, frames, time, status):
         print(status, file=sys.stderr)
     q.put(indata.copy())
 
+
+q = queue.Queue()
+r = sr.Recognizer()
+
+
 if __name__ == "__main__":
     listener = pk.Listener(on_press=on_press, on_release=on_release)
     listener.start()
 
     device_info = sd.query_devices(None, 'input')
     samplerate = int(device_info['default_samplerate'])
-    filename = tempfile.mktemp(prefix='delme_rec_unlimited_', suffix='.wav', dir='')
+    filename = 'output.wav'
 
     recording = False
     while True:
@@ -50,3 +51,13 @@ if __name__ == "__main__":
                         if not recording:
                             print("Recording stopped and file saved.")
                             break
+
+            with sr.AudioFile(filename) as source:
+                audio = r.record(source)
+                try:
+                    text = r.recognize_google(audio, show_all=True)
+                    final_pred = text['alternative'][0]['transcript']
+                    print(f"You: {final_pred}")
+
+                except:
+                    print("Sorry, I didn't catch that.")
