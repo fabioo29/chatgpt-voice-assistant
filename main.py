@@ -313,14 +313,14 @@ if __name__ == "__main__":
                     with sf.SoundFile(youtf.name, mode='w', samplerate=samplerate, channels=1, subtype=None) as file:
                         with sd.InputStream(samplerate=samplerate, device=None, channels=1, callback=callback):
                             ssound.play()
-                            ssound.set_volume(VOICE_VOLUME*0.2)
+                            ssound.set_volume(VOICE_VOLUME*0.1)
                             pygame.time.wait(int(ssound.get_length() * 1000))
                             #print("Recording started...")
                             while True:
                                 file.write(q.get())
                                 if not recording:
                                     esound.play()
-                                    ssound.set_volume(VOICE_VOLUME*0.2)
+                                    esound.set_volume(VOICE_VOLUME*0.1)
                                     pygame.time.wait(int(esound.get_length() * 1000))
                                     #print("Recording stopped...")
                                     break
