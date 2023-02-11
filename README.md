@@ -18,9 +18,7 @@ pip install -r requirements.txt
 playwright install firefox
 ```
 
-In the `config.toml` file, you can see the base prompt that ChatGPT will use to begin the conversation. This prompt uses some *trigger words* (default: *'fix me'*) that change the way ChatGPT responds to the user. You can change these trigger words to whatever you want. You can also change the base prompt to whatever you want.
-
-The way the default prompt works is that if the user says something that starts with the **trigger words**, ChatGPT will act as a **English sentence correction tool**. If the user says something that does not contain the trigger words, ChatGPT will act as a **normal instance of ChatGPT**.
+In the `config.toml` file, you can see the base prompt that ChatGPT will use to begin the conversation. This prompt uses some *trigger words* (default: *'fix me'*) to change the way ChatGPT responds to the user. You can change these trigger words to whatever you want. You can also change the base prompt to whatever you want. The way the default prompt works is that if the user says something that starts with the **trigger words**, ChatGPT will act as a **English sentence correction tool**. If the user says something that does not contain the trigger words, ChatGPT will act as a **normal instance of ChatGPT**.
 
 ```logs
 Setting up ChatGPT, Speech Recognition and Text-To-Speech...
