@@ -1,6 +1,6 @@
 # ChatGPT Voice Assistant
 
-A script that uses the OpenAI's ChatGPT language model as a voice assistant. This script allows users to interact with ChatGPT through voice commands and receive spoken responses.
+A script that uses the OpenAI's ChatGPT language model as a voice assistant. This script allows users to interact with ChatGPT through voice commands and receive spoken responses. This can be useful for people who are trying to learn english or just want to have a fun conversation with a chatbot without having to type anything.
 
 ## Usage
 ```bash
