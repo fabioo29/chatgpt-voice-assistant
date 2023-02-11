@@ -1,0 +1,12 @@
+[paths]
+COOKIES_PATH = 'cookies'
+startfx = 'alert_start.wav'
+endfx = 'alert_end.wav'
+
+[tts]
+volume = 0.8
+model = 'tts_models/en/ljspeech/vits--neon'
+
+[recorder]
+key_combo = 'ALT_L+SHIFT_L'
+lang = 'en-US'

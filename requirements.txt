@@ -9,3 +9,4 @@ pysoundfile==0.9.0.post1
 sounddevice==0.4.5
 speechrecognition==3.9.0
 tts==0.11.1
+toml==0.10.2

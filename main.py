@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import toml
 import json
 import uuid
 import queue
@@ -21,10 +22,14 @@ from pynput import keyboard as pk
 from playwright.sync_api import sync_playwright
 
 
-VOICE_VOLUME = 0.8      # 0.0 to 1.0 (inclusive)
-REC_START_WAV = os.path.join('assets','alert_start.wav')
-REC_END_WAV = os.path.join('assets','alert_end.wav')
-TTS_MODEL = 'tts_models/en/ljspeech/vits--neon'
+config = toml.load("config.toml")
+TTS_MODEL = config["tts"]["model"]
+VOICE_VOLUME = config["tts"]["volume"]
+REC_START_FX = os.path.join('assets', config["paths"]["startfx"])
+REC_END_FX = os.path.join('assets', config["paths"]["endfx"])
+SPEECH_LANG = config["recorder"]["lang"]
+KEYS_COMBO = config["recorder"]["key_combo"]
+
 
 class ChatGPT:
     """
@@ -270,20 +275,30 @@ def callback(indata, frames, time, status):
     q.put(indata.copy())
 
 
-print("Setting up ChatGPT, Speech Recognition and Text-To-Speech...")
-with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-    q = queue.Queue()
-    bot = ChatGPT()
-    r = sr.Recognizer()
-    tts = TTS(model_name=TTS_MODEL, progress_bar=False)
-
 if __name__ == "__main__":
+    if not os.path.exists(os.path.join(os.path.dirname(__file__), "cookies")):
+        chatgpt = ChatGPT(headless=False, timeout=90)
+        print("Running ChatGPT for the first time. Please log in to OpenAI.com and then press CTRL+C to continue...")
+        while True:
+            try:
+                time.sleep(1)
+            except KeyboardInterrupt:
+                chatgpt._cleanup()
+                break
+
+    print("Setting up ChatGPT, Speech Recognition and Text-To-Speech...")
+    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+        q = queue.Queue()
+        bot = ChatGPT()
+        r = sr.Recognizer()
+        tts = TTS(model_name=TTS_MODEL, progress_bar=False)
+
     listener = pk.Listener(on_press=on_press, on_release=on_release)
     listener.start()
 
     pygame.init()
-    ssound = pygame.mixer.Sound(REC_START_WAV)
-    esound = pygame.mixer.Sound(REC_END_WAV)
+    ssound = pygame.mixer.Sound(REC_START_FX)
+    esound = pygame.mixer.Sound(REC_END_FX)
 
     device_info = sd.query_devices(None, 'input')
     samplerate = int(device_info['default_samplerate'])
@@ -298,14 +313,14 @@ if __name__ == "__main__":
                     with sf.SoundFile(youtf.name, mode='w', samplerate=samplerate, channels=1, subtype=None) as file:
                         with sd.InputStream(samplerate=samplerate, device=None, channels=1, callback=callback):
                             ssound.play()
-                            ssound.set_volume(VOICE_VOLUME*0.6)
+                            ssound.set_volume(VOICE_VOLUME*0.2)
                             pygame.time.wait(int(ssound.get_length() * 1000))
                             #print("Recording started...")
                             while True:
                                 file.write(q.get())
                                 if not recording:
                                     esound.play()
-                                    ssound.set_volume(VOICE_VOLUME*0.6)
+                                    ssound.set_volume(VOICE_VOLUME*0.2)
                                     pygame.time.wait(int(esound.get_length() * 1000))
                                     #print("Recording stopped...")
                                     break
@@ -313,11 +328,11 @@ if __name__ == "__main__":
                     with sr.AudioFile(youtf.name) as source:
                         audio = r.record(source)
                         try:
-                            text = r.recognize_google(audio, show_all=True)
+                            text = r.recognize_google(audio, show_all=True, language=SPEECH_LANG)
                             final_pred = text['alternative'][0]['transcript']
                             print(f"\nYou: {final_pred}")
 
-                            response = bot.ask(final_pred)
+                            response = bot.ask(final_pred).replace('\n', ' ')
                             with tempfile.NamedTemporaryFile(suffix='.wav') as bottf:
                                 with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
                                     tts.tts_to_file(text=response, file_path=bottf.name)
