@@ -23,14 +23,20 @@ from playwright.sync_api import sync_playwright
 
 
 config = toml.load("config.toml")
-TTS_MODEL = config["tts"]["model"]
-VOICE_VOLUME = config["tts"]["volume"]
+json_config = json.load(open("config.json"))
+
 REC_START_FX = os.path.join('assets', config["paths"]["startfx"])
 REC_END_FX = os.path.join('assets', config["paths"]["endfx"])
-SPEECH_LANG = config["recorder"]["lang"]
-KEYS_COMBO = config["recorder"]["key_combo"]
-BASE_PROMPT = config["chatgpt"]["base"]
-TRIGGER_WORDS = config["chatgpt"]["trigger"]
+COOKIES_PATH = config["paths"]["cookies"]
+
+VOICE_VOLUME = config["settings"]["volume"]
+KEYS_COMBO = config["settings"]["key_combo"]
+LANGUAGE = config["settings"]["language"]
+
+BASE_PROMPT = json_config[LANGUAGE][0]
+TRIGGER_WORDS = json_config[LANGUAGE][1]
+SPEECH_LANG = json_config[LANGUAGE][2]
+TTS_MODEL = json_config[LANGUAGE][3]
 
 
 class ChatGPT:
@@ -56,7 +62,7 @@ class ChatGPT:
             playbrowser = self.play.firefox
 
         self.browser = playbrowser.launch_persistent_context(
-            user_data_dir=os.path.join(os.path.dirname(__file__), "cookies"),
+            user_data_dir=os.path.join(os.path.dirname(__file__), COOKIES_PATH),
             headless=headless,
         )
         if len(self.browser.pages) > 0:

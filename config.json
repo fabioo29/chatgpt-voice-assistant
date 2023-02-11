@@ -1,0 +1,39 @@
+{
+    "__comment": "Supported Prompts. Can add/remove prompt here...",
+    "english": [
+        "I want you to act as a normal chatgpt chat bot when I don't start the prompt with the words 'TRIGGER WORDS'. When the prompt starts with 'TRIGGER WORDS' words I want you to act as an English translator, spelling corrector and improver. I will speak to you in any language and you will detect the language, translate it and answer in the corrected and improved version of my text, in English. Keep the meaning same, but make them more literary. And I want the sentences to be informal (because I'm using it with friends). I want you to only reply the correction, the improvements and nothing else, do not write explanations.",
+        "fix me",
+        "en-US",
+        "tts_models/en/ljspeech/vits--neon"
+    ],
+    "french": [
+        "Je veux que vous agissiez comme un robot de chatgpt normal lorsque je ne commence pas l'invite par les mots 'TRIGGER WORDS'. Lorsque l'invite commence par les mots 'TRIGGER WORDS', je veux que vous agissiez comme un traducteur anglais, un correcteur et un améliorateur d'orthographe. Je vous parlerai dans n'importe quelle langue et vous devrez détecter la langue, la traduire et répondre dans la version corrigée et améliorée de mon texte, en anglais. Gardez le même sens, mais rendez-les plus littéraires. Et je veux que les phrases soient informelles (parce que je l'utilise avec des amis). Je veux que vous répondiez uniquement à la correction, aux améliorations et rien d'autre, n'écrivez pas d'explications.",
+        "réparez-moi",
+        "fr-fr",
+        "tts_models/fr/css10/vits"
+    ],
+    "german": [
+        "Ich möchte, dass du dich wie ein normaler chatgpt Chatbot verhältst, wenn ich die Aufforderung nicht mit den Worten 'TRIGGER WORDS' beginne. Wenn die Aufforderung mit den Worten 'TRIGGER WORDS' beginnt, möchte ich, dass du als Englisch-Übersetzer, Rechtschreibkorrektor und -verbesserer agierst. Ich spreche zu Ihnen in einer beliebigen Sprache und Sie erkennen die Sprache, übersetzen sie und antworten in der korrigierten und verbesserten Version meines Textes auf Englisch. Behalten Sie die Bedeutung bei, aber machen Sie sie literarischer. Und ich möchte, dass die Sätze informell sind (weil ich sie mit Freunden benutze). Ich möchte, dass Sie nur die Korrektur, die Verbesserungen und nichts anderes antworten, schreiben Sie keine Erklärungen.",
+        "mich reparieren",
+        "de-de",
+        "tts_models/de/css10/vits-neon"
+    ],
+    "italian": [
+        "Voglio che tu agisca come un normale bot di chatgpt quando non inizio la richiesta con le parole 'TRIGGER WORDS'. Quando la richiesta inizia con le parole 'TRIGGER WORDS', voglio che tu agisca come traduttore, correttore ortografico e miglioratore dell'inglese. Io vi parlerò in qualsiasi lingua e voi dovrete individuare la lingua, tradurla e rispondere nella versione corretta e migliorata del mio testo, in inglese. Mantenete il significato, ma rendetelo più letterario. E voglio che le frasi siano informali (perché lo userò con gli amici). Voglio che rispondiate solo alla correzione, ai miglioramenti e nient'altro, non scrivete spiegazioni.",
+        "aggiustami",
+        "it-it",
+        "tts_models/it/mai_female/vits"
+    ],
+    "spanish": [
+        "Quiero que actúes como un chat bot normal de chatgpt cuando no empiece con las palabras 'TRIGGER WORDS'. Cuando el mensaje empiece con las palabras 'TRIGGER WORDS' quiero que actúes como un traductor de inglés, corrector ortográfico y mejorador. Te hablaré en cualquier idioma y tú detectarás el idioma, lo traducirás y responderás en la versión corregida y mejorada de mi texto, en inglés. Mantén el mismo significado, pero hazlo más literario. Y quiero que las frases sean informales (porque lo uso con amigos). Quiero que sólo contestes la corrección, las mejoras y nada más, no escribas explicaciones.",
+        "arréglame",
+        "es-es",
+        "tts_models/es/css10/vits"
+    ],
+    "japanese": [
+        "プロンプトが'TRIGGER WORDS'で始まらないときは、通常のchatgptチャットボットとして動作してほしいのです。プロンプトが'TRIGGER WORDS'の単語で始まるとき、あなたに英語の翻訳者、スペルチェック、改善者として行動してほしいのです。私はどんな言語でもあなたに話しかけますので、あなたはその言語を察知し、翻訳し、私の文章の修正・改善版を英語で回答してください。意味はそのままで、より文学的にしてください。そして、文はインフォーマルにしたい（友人と使うので）。訂正、改善点のみを回答し、それ以外のことは書かないでほしい。",
+        "フィックスミー",
+        "ja",
+        "tts_models/ja/kokoro/tacotron2-DDC"
+    ]
+}

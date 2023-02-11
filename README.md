@@ -33,6 +33,25 @@ You: fix me alright choose the best time for you
 Bot: "Alright, choose the most convenient time for you."
 ```
 
+### Add your own configuration
+
+```md
+config.json
+{
+    "__comment": "Supported Prompts. Can add/remove prompt here...",
+    "new-language": [
+        "begin prompt",
+        "trigger words",
+        "location LCID string (https://www.science.co.il/language/Locale-codes.php)",
+        "coqui TTS model"
+    ], ...
+}
+
+config.toml
+[settings]
+language = 'new-language'
+```
+
 ## Requirements
 
 Python 3.7 (tested)  
@@ -42,7 +61,7 @@ Playwright (tested with Firefox)
 
 Feel free to open an issue or pull request if you have any suggestions or find any bugs.
 
-- [ ] Add support for multiple languages
+- [X] Add support for multiple languages
 - [ ] Add support for other TTS engines
 - [ ] Add support for other STT engines
 - [X] Add support for ChatGPT to begin with a base pre-defined prompt
