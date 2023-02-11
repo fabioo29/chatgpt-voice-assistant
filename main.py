@@ -29,6 +29,8 @@ REC_START_FX = os.path.join('assets', config["paths"]["startfx"])
 REC_END_FX = os.path.join('assets', config["paths"]["endfx"])
 SPEECH_LANG = config["recorder"]["lang"]
 KEYS_COMBO = config["recorder"]["key_combo"]
+BASE_PROMPT = config["chatgpt"]["base"]
+TRIGGER_WORDS = config["chatgpt"]["trigger"]
 
 
 class ChatGPT:
@@ -302,6 +304,8 @@ if __name__ == "__main__":
 
     device_info = sd.query_devices(None, 'input')
     samplerate = int(device_info['default_samplerate'])
+
+    _ = bot.ask(BASE_PROMPT.replace("TRIGGER WORDS", TRIGGER_WORDS))
 
     recording = False
     try:

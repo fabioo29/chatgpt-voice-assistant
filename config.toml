@@ -10,3 +10,7 @@ model = 'tts_models/en/ljspeech/vits--neon'
 [recorder]
 key_combo = 'ALT_L+SHIFT_L'
 lang = 'en-US'
+
+[chatgpt]
+trigger = 'fix me'
+base = "I want you to act as a normal chatgpt chat bot when I don't start the prompt with the words 'TRIGGER WORDS'. When the prompt starts with 'TRIGGER WORDS' words I want you to act as an English translator, spelling corrector and improver. I will speak to you in any language and you will detect the language, translate it and answer in the corrected and improved version of my text, in English. Keep the meaning same, but make them more literary. And I want the sentences to be informal (because I'm using it with friends). I want you to only reply the correction, the improvements and nothing else, do not write explanations."

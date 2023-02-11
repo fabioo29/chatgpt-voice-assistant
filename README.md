@@ -18,6 +18,23 @@ pip install -r requirements.txt
 playwright install firefox
 ```
 
+In the `config.toml` file, you can see the base prompt that ChatGPT will use to begin the conversation. This prompt uses some *trigger words* (default: *'fix me'*) that change the way ChatGPT responds to the user. You can change these trigger words to whatever you want. You can also change the base prompt to whatever you want.
+
+The way the default prompt works is that if the user says something that starts with the **trigger words**, ChatGPT will act as a **English sentence correction tool**. If the user says something that does not contain the trigger words, ChatGPT will act as a **normal instance of ChatGPT**.
+
+```logs
+Setting up ChatGPT, Speech Recognition and Text-To-Speech...
+
+Welcome to ChatGPT!  Press ALT to start talking, and release to stop.
+Press CTRL+C to exit and wait for the program to finish.
+
+You: where's Portugal
+Bot: Portugal is a country located in southwestern Europe on the Iberian Peninsula.
+
+You: fix me alright choose the best time for you
+Bot: "Alright, choose the most convenient time for you."
+```
+
 ## Requirements
 
 Python 3.7 (tested)  
@@ -30,7 +47,7 @@ Feel free to open an issue or pull request if you have any suggestions or find a
 - [ ] Add support for multiple languages
 - [ ] Add support for other TTS engines
 - [ ] Add support for other STT engines
-- [ ] Add support for ChatGPT to begin with a base pre-defined prompt
+- [X] Add support for ChatGPT to begin with a base pre-defined prompt
 - [ ] Add support for configurable key combinations to start/stop recording
 
 ## Credits
