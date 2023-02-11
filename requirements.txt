@@ -1,0 +1,11 @@
+gruut-lang-de==2.0.0
+playsound==1.3.0
+playwright==1.30.0
+pyaudio==0.2.13
+pygame==2.1.2
+pygobject==3.42.2
+pynput==1.7.6
+pysoundfile==0.9.0.post1
+sounddevice==0.4.5
+speechrecognition==3.9.0
+tts==0.11.1
