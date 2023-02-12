@@ -9,7 +9,7 @@ virtualenv venv -p python3.7
 source venv/bin/activate
 
 # install dependencies (tested on Ubuntu 18.04)
-sudo apt-get install python-pyaudio libgirepository1.0-dev libjack-jackd2-dev portaudio19-dev
+sudo apt-get install python-pyaudio libgirepository1.0-dev libjack-jackd2-dev portaudio19-dev libpython3.9-dev
 
 # install python dependencies
 pip install -r requirements.txt
