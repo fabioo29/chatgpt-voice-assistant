@@ -69,7 +69,7 @@ Feel free to open an issue or pull request if you have any suggestions or find a
 
 ## Credits
 
-This project uses [chatgpt-wrapper](github.com/mmabrouk/chatgpt-wrapper)
+This project uses [chatgpt-wrapper](https://github.com/mmabrouk/chatgpt-wrapper)
 
 ## License
 
