@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import toml
 import json
@@ -7,23 +6,30 @@ import uuid
 import queue
 import atexit
 import base64
-import pygame
 import tempfile
 import operator
+import telegram
+import traceback
+import subprocess
 import contextlib
-import soundfile as sf
-import sounddevice as sd
+
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 from time import sleep
 from TTS.api import TTS
 from functools import reduce
+from dotenv import load_dotenv
 import speech_recognition as sr
-from pynput import keyboard as pk
 from playwright.sync_api import sync_playwright
 
 
-config = toml.load("config.toml")
-json_config = json.load(open("config.json"))
+load_dotenv()  # load .env secret keys
+
+config = toml.load(os.path.join(os.path.dirname(
+    os.path.realpath(__file__)), "config.toml"))
+json_config = json.load(
+    open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")))
 
 REC_START_FX = os.path.join('assets', config["paths"]["startfx"])
 REC_END_FX = os.path.join('assets', config["paths"]["endfx"])
@@ -37,6 +43,8 @@ BASE_PROMPT = json_config[LANGUAGE][0]
 TRIGGER_WORDS = json_config[LANGUAGE][1]
 SPEECH_LANG = json_config[LANGUAGE][2]
 TTS_MODEL = json_config[LANGUAGE][3]
+
+BOT_TOKEN = os.getenv('BOT_TOKEN')  # telegram bot token
 
 
 class ChatGPT:
@@ -62,7 +70,7 @@ class ChatGPT:
             playbrowser = self.play.firefox
 
         self.browser = playbrowser.launch_persistent_context(
-            user_data_dir=os.path.join(os.path.dirname(__file__), COOKIES_PATH),
+            user_data_dir=COOKIES_PATH,
             headless=headless,
         )
         if len(self.browser.pages) > 0:
@@ -103,7 +111,8 @@ class ChatGPT:
         )
 
         while True:
-            session_datas = self.page.query_selector_all(f"div#{self.session_div_id}")
+            session_datas = self.page.query_selector_all(
+                f"div#{self.session_div_id}")
             if len(session_datas) > 0:
                 break
             sleep(0.2)
@@ -111,11 +120,14 @@ class ChatGPT:
         session_data = json.loads(session_datas[0].inner_text())
         self.session = session_data
 
-        self.page.evaluate(f"document.getElementById('{self.session_div_id}').remove()")
+        self.page.evaluate(
+            f"document.getElementById('{self.session_div_id}').remove()")
 
     def _cleanup_divs(self):
-        self.page.evaluate(f"document.getElementById('{self.stream_div_id}').remove()")
-        self.page.evaluate(f"document.getElementById('{self.eof_div_id}').remove()")
+        self.page.evaluate(
+            f"document.getElementById('{self.stream_div_id}').remove()")
+        self.page.evaluate(
+            f"document.getElementById('{self.eof_div_id}').remove()")
 
     def ask_stream(self, prompt: str):
         if self.session is None:
@@ -213,7 +225,8 @@ class ChatGPT:
             full_event_message = None
 
             try:
-                event_raw = base64.b64decode(conversation_datas[0].inner_html())
+                event_raw = base64.b64decode(
+                    conversation_datas[0].inner_html())
                 if len(event_raw) > 0:
                     event = json.loads(event_raw)
                     if event is not None:
@@ -267,20 +280,85 @@ class ChatGPT:
         self.conversation_id = None
 
 
-def on_press(key):
-    if key == pk.Key.alt_l:
-        global recording
-        recording = True
+class TelegramBot:
+    def __init__(self, token):
+        self.sender = telegram.Bot(token=token)
+        self.receiver = Updater(token=token, use_context=True, request_kwargs={
+                                'read_timeout': 60, 'connect_timeout': 60})
+        self.set_dispatcher()
+        self.show_transcript = False
 
-def on_release(key):
-    if key == pk.Key.alt_l:
-        global recording
-        recording = False
+    def button_handler(self, update: Update, context: CallbackContext):
+        """ if update.callback_query.data == 'delete':
+            print('Command: delete')
+            context.bot.send_message(
+                chat_id=update.effective_chat.id, text=f'Command: delete') """
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text=f'NotImplemented')
 
-def callback(indata, frames, time, status):
-    if status:
-        print(status, file=sys.stderr)
-    q.put(indata.copy())
+    def msg_handler(self, update, context):
+        command = update.message.text.lower()
+
+        if 'transcript' in command:
+            self.show_transcript = not self.show_transcript
+            update.message.reply_text(
+                f'Show transcript: {self.show_transcript}')
+
+    def voice_handler(self, update: Update, context: CallbackContext) -> None:
+        print("telegram voice received")
+        new_file = context.bot.get_file(update.message.voice.file_id)
+
+        # Convert the audio file to WAV format using FFmpeg
+        with tempfile.NamedTemporaryFile(suffix='.wav') as tf:
+            print(f".oga -> .wav: ffmpeg -i {new_file.file_path} {tf.name} -y")
+            with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+                subprocess.run(
+                    ['ffmpeg', '-i', new_file.file_path, tf.name, '-y', '-loglevel', 'quiet'])
+            print("audio converted")
+
+            with sr.AudioFile(tf.name) as source:
+                print(".wav -> audio object")
+                audio = r.record(source)
+                print("audio object created")
+                try:
+                    print("speech recognition")
+                    text = r.recognize_google(
+                        audio, show_all=True, language=SPEECH_LANG)
+                    final_pred = text['alternative'][0]['transcript']
+                    print(f"You: {final_pred}")
+                    if self.show_transcript:
+                        update.message.reply_text(f'You: {final_pred}')
+
+                    if not hasattr(self, "chatgpt"):
+                        self.chatgpt = ChatGPT(headless=True)
+
+                    print("sending input to chatgpt")
+                    response = self.chatgpt.ask(final_pred).replace('\n', ' ')
+                    print(f"Bot: {response}")
+                    with tempfile.NamedTemporaryFile(suffix='.wav') as bottf:
+                        print("chatgpt response -> audio file")
+                        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+                            tts.tts_to_file(
+                                text=response, file_path=bottf.name)
+                        if self.show_transcript:
+                            update.message.reply_text(f'Bot: {response}')
+                        print("sending audio file to telegram")
+                        context.bot.send_voice(
+                            chat_id=update.effective_chat.id, voice=open(bottf.name, 'rb'))
+                except Exception as e:
+                    print(f"{traceback.format_exc()}")
+                    update.message.reply_text("Something went wrong...")
+
+    def set_dispatcher(self):
+        self.dispatcher = self.receiver.dispatcher
+        self.dispatcher.add_handler(MessageHandler(
+            Filters.voice, self.voice_handler))
+        self.dispatcher.add_handler(
+            MessageHandler(Filters.text, self.msg_handler))
+        
+        self.receiver.start_polling()
+
+        print("telegram receiver/dispatcher initialized")
 
 
 if __name__ == "__main__":
@@ -294,67 +372,11 @@ if __name__ == "__main__":
                 chatgpt._cleanup()
                 break
 
-    print("Setting up ChatGPT, Speech Recognition and Text-To-Speech...")
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         q = queue.Queue()
-        bot = ChatGPT()
+        chatgpt = ChatGPT(headless=True, timeout=90)._cleanup()
         r = sr.Recognizer()
         tts = TTS(model_name=TTS_MODEL, progress_bar=False)
+    print("chatgpt, tts engine, stt engine tested")
 
-    listener = pk.Listener(on_press=on_press, on_release=on_release)
-    listener.start()
-
-    pygame.init()
-    ssound = pygame.mixer.Sound(REC_START_FX)
-    esound = pygame.mixer.Sound(REC_END_FX)
-
-    device_info = sd.query_devices(None, 'input')
-    samplerate = int(device_info['default_samplerate'])
-
-    _ = bot.ask(BASE_PROMPT.replace("TRIGGER WORDS", TRIGGER_WORDS))
-
-    recording = False
-    try:
-        print("\nWelcome to ChatGPT!  Press ALT to start talking, and release to stop.")
-        print("Press CTRL+C to exit and wait for the program to finish.\n")
-        while True:
-            if recording:
-                with tempfile.NamedTemporaryFile(suffix='.wav') as youtf:
-                    with sf.SoundFile(youtf.name, mode='w', samplerate=samplerate, channels=1, subtype=None) as file:
-                        with sd.InputStream(samplerate=samplerate, device=None, channels=1, callback=callback):
-                            ssound.play()
-                            ssound.set_volume(VOICE_VOLUME*0.1)
-                            pygame.time.wait(int(ssound.get_length() * 1000))
-                            #print("Recording started...")
-                            while True:
-                                file.write(q.get())
-                                if not recording:
-                                    esound.play()
-                                    esound.set_volume(VOICE_VOLUME*0.1)
-                                    pygame.time.wait(int(esound.get_length() * 1000))
-                                    #print("Recording stopped...")
-                                    break
-
-                    with sr.AudioFile(youtf.name) as source:
-                        audio = r.record(source)
-                        try:
-                            text = r.recognize_google(audio, show_all=True, language=SPEECH_LANG)
-                            final_pred = text['alternative'][0]['transcript']
-                            print(f"\nYou: {final_pred}")
-
-                            response = bot.ask(final_pred).replace('\n', ' ')
-                            with tempfile.NamedTemporaryFile(suffix='.wav') as bottf:
-                                with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-                                    tts.tts_to_file(text=response, file_path=bottf.name)
-                                print(f"Bot: {response}")
-                                vresponse = pygame.mixer.Sound(bottf.name)
-                                vresponse.play()
-                                vresponse.set_volume(VOICE_VOLUME)
-                                pygame.time.wait(int(vresponse.get_length() * 1000))
-                        except:
-                            print("Bot: Sorry, I didn't catch that.")
-
-    except KeyboardInterrupt:
-        print('Bot: Goodbye!')
-        listener.stop()
-        pygame.quit()
+    _ = TelegramBot(BOT_TOKEN)
