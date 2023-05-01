@@ -331,6 +331,7 @@ class TelegramBot:
 
                     if not hasattr(self, "chatgpt"):
                         self.chatgpt = ChatGPT(headless=True)
+                        self.chatgpt.ask(BASE_PROMPT.replace("TRIGGER WORDS", TRIGGER_WORDS))
 
                     print("sending input to chatgpt")
                     response = self.chatgpt.ask(final_pred).replace('\n', ' ')
