@@ -372,7 +372,7 @@ if __name__ == "__main__":
             except KeyboardInterrupt:
                 chatgpt._cleanup()
                 break
-
+    
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         q = queue.Queue()
         chatgpt = ChatGPT(headless=True, timeout=90)._cleanup()

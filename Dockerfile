@@ -16,19 +16,27 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt &&\
     apt-get autoremove -y && \
     apt-get clean && \
-    rm requirements.txt && \
-    playwright install firefox
+    rm requirements.txt
 
 COPY .env /app/.env
 RUN chmod 0644 /app/.env
-RUN chown root:root /app/.env
+
+# Create a non-root user and set permissions
+RUN useradd -m nonroot && \
+    chown -R nonroot /app
+
+# Switch to the non-root user
+USER nonroot
+RUN chown nonroot:nonroot /app/.env
 
 COPY *.py ./
 COPY cookies.tar.* ./
-
 COPY config.* /app/
 
 RUN cat cookies.tar.* | tar -xzf - --checkpoint=.1000 --checkpoint-action=dot
 
+# Install playwright
+RUN playwright install
+
 #CMD ["tail", "-f", "/dev/null"]
-CMD ["python", "main.py"]
+CMD ["/usr/local/bin/python", "/app/main.py"]
