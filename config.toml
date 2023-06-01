@@ -5,5 +5,5 @@ endfx = 'alert_end.wav'
 
 [settings]
 volume = 0.8
-language = 'english'
+language = 'custom'
 key_combo = 'ALT_L+SHIFT_L'
